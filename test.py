@@ -48,6 +48,7 @@ def get_perspective_img(img,aws):
     
     warp = cv2.warpPerspective(img, M, (maxWidth, maxHeight))
     return warp
+
 def get_val_matrix(dd):
     val_mat=np.zeros((7,7))
     for i in range(0,7,1):
@@ -74,18 +75,37 @@ def get_id(mat):
     for i in range(len(fin)):
         idd=idd+str(fin[i])
     return int(idd,2)
-img=cv2.imread('aruco.jpg')
-cv2.imshow('kld',img)
-squares=get_squares(img);
+def xor(a,b):
+    if bool(a) != bool(b):
+        return 1
+    else:
+        return 0
+def parity(array):
+    dummy=0
+    for i in array:
+        dummy=xor(dummy,i)
+    return dummy
+def check(mat,idd):
+    okay=True
+    for i in range(len(mat)):
+        row=mat[i,:]
+        if parity([row[0],row[1],row[2],row[3]])!=1 or parity([row[1],row[3],row[4]])!=0:
+            okay=False
+            break
+    return okay
 
+img=cv2.imread('final_.png')
+#cv2.imshow('kld',img)
+squares=get_squares(img);
+ids=set()
 
 for k in range(0,len(squares)):
     dd=get_perspective_img(img,squares[k])
     #cv2.drawContours( img, squares, j, (0, 255, 0), 3 )
-    
     mat= get_val_matrix(dd)
-    print mat
-    print get_id(mat)
-cv2.waitKey(0);
-    
-cv2.destroyAllWindows()
+    idd=get_id(mat)
+    #print mat,idd
+    if check(mat,idd)==True:
+        ids.add(idd)
+print ids
+
