@@ -31,7 +31,7 @@ def get_squares(img):
 
 def get_perspective_img(img,aws):
 
-    dim=700
+    dim=350
     old_pts = np.float32([aws[0],aws[1],aws[2],aws[3]])
     
     (tl, tr, br, bl) = aws
@@ -46,9 +46,9 @@ def get_perspective_img(img,aws):
 
     new_pts = np.array([[0, 0],[maxWidth - 1, 0],[maxWidth - 1, maxHeight - 1],[0, maxHeight - 1]], dtype = "float32")
 
-    #new_pts = np.float32([[0,0],[dim,0],[dim,dim],[0,dim]])
-    #maxWidth = dim
-    #maxHeight = dim
+    new_pts = np.float32([[0,0],[dim,0],[dim,dim],[0,dim]])
+    maxWidth = dim
+    maxHeight = dim
     
     M = cv2.getPerspectiveTransform(old_pts, new_pts)
     
@@ -73,7 +73,6 @@ def get_val_matrix(dd,min_dim):
             		val_mat[i][j]=1
 	    else:
 			val_mat[i][j]=0
-	    
     return val_mat[1:6].T[1:6].T
 def get_id(mat):
     idd=''
@@ -81,7 +80,7 @@ def get_id(mat):
     col1=mat[:,1]
     col2=mat[:,3]
     x=[col1,col2]
-    #print x
+    
     for i in range(len(col1)):
         d=[col1[i],col2[i]]
         fin.append(d)
@@ -120,60 +119,49 @@ def rotate(image, angle, center = None, scale = 1.0):
 
     return rotated
 
-cap = cv2.VideoCapture(1)
+img=cv2.imread('/home/naren/Desktop/ab_award/acuco_/images/took.jpg')
 
-while(True):
-    
-        ret, img = cap.read()
+squares=get_squares(img);
 
-	
+ids=set()
+#cv2.drawContours( img, squares, -1, (0, 255, 0), 3 )
 
-	squares=get_squares(img);
 
-	ids=set()
-	#cv2.drawContours( img, squares, -1, (0, 255, 0), 3 )
-	cv2.imshow('a',img)
-
-	dds=[]
-	min_dim=0
-	for k in range(0,len(squares)):
-		dd,w,h=get_perspective_img(img,squares[k])
-		min_dim=min(w,h)	
-		x=[dd,min_dim]
-		dds.append(x)
+dds=[]
+min_dim=0
+for k in range(0,len(squares)):
+	dd,w,h=get_perspective_img(img,squares[k])
+	min_dim=min(w,h)	
+	x=[dd,min_dim]
+	dds.append(x)
 		
 
-	dds_ext=[]
-	for dd in range(len(dds[:])):
-		xd=dds[:][dd][0]
-		yd=dds[:][dd][1]
-		rot_0=xd.copy();
-		rot_90=rotate(xd.copy(),90)
-		rot_180=rotate(xd.copy(),180)
-		rot_270=rotate(xd.copy(),270)
-		dds_ext.append([rot_0,yd])
-		dds_ext.append([rot_90,yd])
-		dds_ext.append([rot_180,yd])
-		dds_ext.append([rot_270,yd])
+dds_ext=[]
+for dd in range(len(dds[:])):
+	xd=dds[:][dd][0]
+	yd=dds[:][dd][1]
+	rot_0=xd.copy();
+	rot_90=rotate(xd.copy(),90)
+	rot_180=rotate(xd.copy(),180)
+	rot_270=rotate(xd.copy(),270)
+	dds_ext.append([rot_0,yd])
+	dds_ext.append([rot_90,yd])
+	dds_ext.append([rot_180,yd])
+	dds_ext.append([rot_270,yd])
 	
 
 
-	for dd in range(len(dds_ext[:])):
-		xd=dds_ext[:][dd][0]
-		yd=dds_ext[:][dd][1]
-		#cv2.imshow('ss',xd)
+for dd in range(len(dds_ext[:])):
+	xd=dds_ext[:][dd][0]
+	yd=dds_ext[:][dd][1]
+	#cv2.imshow('ss',xd)
 
-		mat= get_val_matrix(xd,yd)
-		idd=get_id(mat)
-		#print idd,yd
-		if check(mat,idd)==True:
-			ids.add(idd)
-	print ids
-        
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-        
+	mat= get_val_matrix(xd,yd)
+	idd=get_id(mat)
+	#print idd,yd
+	if check(mat,idd)==True:
+		ids.add(idd)
+print ids
 
-# When everything done, release the capture
-cap.release()
+cv2.waitKey(0)
 cv2.destroyAllWindows()

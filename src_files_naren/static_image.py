@@ -31,7 +31,7 @@ def get_squares(img):
 
 def get_perspective_img(img,aws):
 
-    dim=350
+    dim=700
     old_pts = np.float32([aws[0],aws[1],aws[2],aws[3]])
     
     (tl, tr, br, bl) = aws
